@@ -6,7 +6,19 @@
       "use": "@vercel/python",
       "config": {
         "includeFiles": ["templates/**", "static/**", "app.py"],
-        "excludeFiles": ["**/node_modules/**", "**/.git/**", "**/__pycache__/**"]
+        "excludeFiles": [
+          "**/node_modules/**",
+          "**/.git/**",
+          "**/__pycache__/**",
+          "**/assets/**",
+          "**/.github/**",
+          "LICENSE.md",
+          "README.md",
+          "qodana.sarif.json",
+          "qodana.yaml",
+          ".env.example",
+          ".gitignore"
+        ]
       }
     }
   ],
