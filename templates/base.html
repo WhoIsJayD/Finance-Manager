@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Manager</title>
+    <!-- Enhanced Metadata for SEO and Social Sharing -->
+    <meta name="description"
+          content="Manage your finances with ease using Finance Manager. Track expenses, add income, and generate reports effortlessly.">
+    <meta name="author" content="Jaydeep Solanki">
+    <meta property="og:title" content="Finance Manager">
+    <meta property="og:description"
+          content="Manage your finances with ease using Finance Manager. Track expenses, add income, and generate reports effortlessly.">
+    <!-- Replace 'logo.png' with your actual logo filename -->
+    <meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
+    <meta property="og:url" content="{{ url_for('dashboard') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:image" content="{{ url_for('static', filename='images/logo.png') }}">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <style>
+        /* Styling for Plotly charts */
+        .plotly-graph-div {
+            margin: auto;
+        }
+
+        .nav-bar {
+            background-color: rgba(0, 0, 0, 0);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-bar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .nav-bar a {
+            color: rgb(0, 0, 0);
+            text-decoration: none;
+            padding: 10px;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-bar a:hover {
+            opacity: 0.7;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .menu-icon {
+            display: none;
+            cursor: pointer;
+        }
+
+        .menu-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .menu-icon.active .bar1,
+        .menu-icon.active .bar2,
+        .menu-icon.active .bar3 {
+            background-color: #333;
+        }
+
+        .sidebar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 250px;
+            background-color: #fff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding-top: 60px;
+            transition: transform 0.3s ease;
+            transform: translateX(-100%);
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar .nav-links {
+            flex-direction: column;
+            gap: 10px;
+            padding: 20px;
+        }
+
+        .sidebar .nav-links a {
+            padding: 15px;
+            display: block;
+        }
+
+        @media screen and (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .menu-icon {
+                display: block;
+            }
+
+            .sidebar.active {
+                display: block;
+                background-color: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(10px);
+                color: whitesmoke;
+                text-align: center;
+                padding: 10px;
+                margin: auto auto;
+                font-size: 20px;
+
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+            }
+
+            .content {
+                margin-left: 0; /* Adjust margin for content */
+            }
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .content {
+            flex: 1;
+            transition: margin-left 0.3s ease;
+            padding: 20px;
+        }
+
+        .footer {
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: auto;
+        }
+
+        .footer a {
+            color: rgb(0, 255, 255);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation bar -->
+<nav class="nav-bar">
+    <div class="container mx-auto flex justify-between items-center px-4 py-2">
+        <a href={{ url_for('dashboard') }} class="text-2xl font-bold flex items-center">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Finance Manager Logo" class="h-8 mr-2">
+        Finance Manager
+        </a>
+        <div class="nav-links">
+            {% if session.user_id %}
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('add_expense') }}">Add Expense</a>
+                <a href="{{ url_for('add_income') }}">Add Income</a>
+                <a href="{{ url_for('reports') }}">Reports</a>
+                <a href="{{ url_for('config') }}">Config</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('signup') }}">Sign Up</a>
+            {% endif %}
+        </div>
+        <div class="menu-icon" onclick="toggleMenu()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </div>
+</nav>
+
+<div class="sidebar nav-links">
+    {% if session.user_id %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <br>
+        <a href="{{ url_for('add_expense') }}">Add Expense</a>
+        <br>
+        <a href="{{ url_for('add_income') }}">Add Income</a>
+
+        <br>
+
+        <a href="{{ url_for('reports') }}">Reports</a>
+        <br>
+        <a href="{{ url_for('config') }}">Config</a>
+        <br>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <br>
+        <a href="{{ url_for('signup') }}">Sign Up</a>
+    {% endif %}
+</div>
+
+<div class="content container mx-auto mt-8 px-4">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div id="datetime" class="text-gray-700 text-center mb-4"></div>
+
+    {% block content %}{% endblock %}
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container mx-auto px-4">
+        <p>Created by Jaydeep Solanki</p>
+        <p>For any inquiries or permissions, please contact:</p>
+        <p>
+            <strong>Name:</strong> Jaydeep Solanki<br>
+            <strong>Email:</strong> <a href="mailto:jaydeep.solankee@yahoo.com">jaydeep.solankee@yahoo.com</a><br>
+            <strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/jaydeep-solanki-79ab61253/">Jaydeep Solanki
+            on LinkedIn</a>
+        </p>
+        <p>For account deletion, please contact the above email.</p>
+    </div>
+</footer>
+
+<script>
+    function updateDateTime() {
+        const now = new Date();
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const month = months[now.getMonth()];
+        const timeString = now.toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
+
+        document.getElementById('datetime').textContent = `${timeString} - ${month}`;
+    }
+
+    function toggleMenu() {
+        const menuIcon = document.querySelector('.menu-icon');
+        const sidebar = document.querySelector('.sidebar');
+        menuIcon.classList.toggle('active');
+        sidebar.classList.toggle('active');
+    }
+
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
+</script>
+
+</body>

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl mt-8">
+        <div class="p-8">
+            <h2 class="text-2xl font-bold mb-4">Configuration Settings</h2>
+            <form method="POST">
+                <div class="mb-4">
+                    <label for="layout" class="block text-gray-700 font-bold mb-2">Layout</label>
+                    <input type="text" name="layout" id="layout" value="{{ config.layout }}" required
+                           class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="currency" class="block text-gray-700 font-bold mb-2">Currency</label>
+                    <input type="text" name="currency" id="currency" value="{{ config.currency }}" required
+                           class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="theme" class="block text-gray-700 font-bold mb-2">Theme</label>
+                    <input type="text" name="theme" id="theme" value="{{ config.theme }}" required
+                           class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="categories" class="block text-gray-700 font-bold mb-2">Categories
+                        (comma-separated)</label>
+                    <input type="text" name="categories" id="categories" value="{{ config.categories|join(', ') }}"
+                           required
+                           class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="sources" class="block text-gray-700 font-bold mb-2">Sources (comma-separated)</label>
+                    <input type="text" name="sources" id="sources" value="{{ config.sources|join(', ') }}" required
+                           class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500">
+                </div>
+                <button type="submit"
+                        class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:shadow-outline">
+                    Save Configuration
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
