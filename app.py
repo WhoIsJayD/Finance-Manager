@@ -6,14 +6,19 @@ import plotly.express as px
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_pymongo import PyMongo
-from pymongo.errors import ConnectionFailure
+from pymongo.errors: ConnectionFailure
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_caching import Cache
+import asyncio
 
 load_dotenv()
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 app.secret_key = os.getenv("SECRET_KEY")
+app.config['CACHE_TYPE'] = 'simple'
+
+cache = Cache(app)
 
 try:
     mongo = PyMongo(app)
@@ -44,7 +49,7 @@ def before_request():
 
 
 @app.route("/signup", methods=["GET", "POST"])
-def signup():
+async def signup():
     if "user_id" in session:
         flash("You are already logged in!")
         return redirect(url_for("dashboard"))
@@ -76,7 +81,7 @@ def signup():
 
 
 @app.route("/login", methods=["GET", "POST"])
-def login():
+async def login():
     if "user_id" in session:
         flash("You are already logged in!")
         return redirect(url_for("dashboard"))
@@ -103,22 +108,29 @@ def logout():
 
 
 @app.route("/")
-def dashboard():
+async def dashboard():
     if 'user_id' not in session:
         flash('You need to log in first', 'error')
         return redirect(url_for('login'))
 
     user_id = session["user_id"]
-    expenses = list(mongo.db.expenses.find({"user_id": user_id}))
-    incomes = list(mongo.db.incomes.find({"user_id": user_id}))
+
+    # Use cache to store data temporarily to improve performance
+    expenses = cache.get(f'expenses_{user_id}')
+    incomes = cache.get(f'incomes_{user_id}')
+    if not expenses or not incomes:
+        expenses = list(mongo.db.expenses.find({"user_id": user_id}))
+        incomes = list(mongo.db.incomes.find({"user_id": user_id}))
+        cache.set(f'expenses_{user_id}', expenses, timeout=300)
+        cache.set(f'incomes_{user_id}', incomes, timeout=300)
 
     total_expense = sum(expense.get("amount", 0) for expense in expenses)
     total_income = sum(income.get("amount", 0) for income in incomes)
     balance = total_income - total_expense
 
-    expense_chart = generate_expense_chart(expenses)
-    income_chart = generate_income_chart(incomes)
-    balance_trend = generate_balance_trend(expenses, incomes)
+    expense_chart = await asyncio.to_thread(generate_expense_chart, expenses)
+    income_chart = await asyncio.to_thread(generate_income_chart, incomes)
+    balance_trend = await asyncio.to_thread(generate_balance_trend, expenses, incomes)
 
     return render_template("dashboard.html",
                            total_expense=total_expense,
@@ -131,7 +143,7 @@ def dashboard():
 
 
 @app.route("/add_expense", methods=["GET", "POST"])
-def add_expense():
+async def add_expense():
     if 'user_id' not in session:
         flash('You need to log in first', 'error')
         return redirect(url_for('login'))
@@ -165,6 +177,10 @@ def add_expense():
             "date": date
         })
 
+        # Invalidate the cache
+        cache.delete(f'expenses_{user_id}')
+        cache.delete(f'incomes_{user_id}')
+
         flash("Expense added successfully")
         return redirect(url_for("dashboard"))
 
@@ -173,7 +189,7 @@ def add_expense():
 
 
 @app.route("/add_income", methods=["GET", "POST"])
-def add_income():
+async def add_income():
     if 'user_id' not in session:
         flash('You need to log in first', 'error')
         return redirect(url_for('login'))
@@ -197,6 +213,10 @@ def add_income():
             "date": date
         })
 
+        # Invalidate the cache
+        cache.delete(f'expenses_{user_id}')
+        cache.delete(f'incomes_{user_id}')
+
         flash("Income added successfully")
         return redirect(url_for("dashboard"))
 
@@ -205,7 +225,7 @@ def add_income():
 
 
 @app.route("/reports")
-def reports():
+async def reports():
     if 'user_id' not in session:
         flash('You need to log in first', 'error')
         return redirect(url_for('login'))
@@ -214,9 +234,9 @@ def reports():
     expenses = list(mongo.db.expenses.find({"user_id": user_id}))
     incomes = list(mongo.db.incomes.find({"user_id": user_id}))
 
-    monthly_report = generate_monthly_report(expenses, incomes)
-    yearly_report = generate_yearly_report(expenses, incomes)
-    weekly_report = generate_weekly_report(expenses, incomes)
+    monthly_report = await asyncio.to_thread(generate_monthly_report, expenses, incomes)
+    yearly_report = await asyncio.to_thread(generate_yearly_report, expenses, incomes)
+    weekly_report = await asyncio.to_thread(generate_weekly_report, expenses, incomes)
 
     user_id = session["user_id"]
     _config = mongo.db.config.find_one({"user_id": user_id})
@@ -228,7 +248,7 @@ def reports():
 
 
 @app.route('/config', methods=['GET', 'POST'])
-def config():
+async def config():
     if 'user_id' not in session:
         flash('You need to log in first', 'error')
         return redirect(url_for('login'))
@@ -255,8 +275,8 @@ def config():
             upsert=True
         )
 
-        flash('Configuration saved successfully', 'success')
-        return redirect(url_for('config'))
+        flash('Configuration saved successfully')
+    return redirect(url_for('config'))
 
     # Fetch current configuration from MongoDB
     user_config = mongo.db.config.find_one({'user_id': user_id})
@@ -264,7 +284,6 @@ def config():
         user_config = initial_config
 
     return render_template('config.html', config=user_config)
-
 
 def generate_expense_chart(expenses):
     df = pd.DataFrame(expenses)
@@ -346,7 +365,7 @@ def generate_yearly_report(expenses, incomes):
     df_expenses = df_expenses.dropna(subset=['date'])
 
     df_incomes["date"] = pd.to_datetime(df_incomes['date'], errors='coerce')
-    df_incomes = df_incomes.dropna(subset=['date'])
+    df_incomes = df_incomes.dropna(subset(['date'])
 
     df_expenses["year"] = df_expenses["date"].dt.year.astype(str)
     df_incomes["year"] = df_incomes["date"].dt.year.astype(str)
@@ -390,7 +409,3 @@ def parse_date(date_str):
         return datetime.strptime(date_str, '%Y-%m-%d')
     except ValueError:
         return None
-
-
-if __name__ == "__main__":
-    app.run(use_reloader=True, debug=False)
