@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-screen py-8">
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+        <h2 class="font-bold text-xl mb-2">Rate Limit Exceeded</h2>
+        <p>You have exceeded the allowed number of requests. Please wait a while before trying again.</p>
+    </div>
+    <div class="mt-4">
+        <a href="{{ url_for('dashboard') }}" class="text-blue-500 hover:underline">Return to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,24 +1,34 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
 import plotly.express as px
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-from flask_pymongo import PyMongo
-from pymongo.errors: ConnectionFailure
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask_caching import Cache
-import asyncio
+from flask_pymongo import PyMongo
+from pymongo.errors import ConnectionFailure
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 load_dotenv()
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 app.secret_key = os.getenv("SECRET_KEY")
-app.config['CACHE_TYPE'] = 'simple'
+app.config["CACHE_TYPE"] = "simple"
+app.config["CACHE_DEFAULT_TIMEOUT"] = 300
 
 cache = Cache(app)
+
+# Configure Flask-Limiter to use MongoDB as the storage backend
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    storage_uri=os.getenv("MONGO_URI")
+)
 
 try:
     mongo = PyMongo(app)
@@ -33,6 +43,7 @@ try:
 except ConnectionFailure as e:
     print(f"Failed to connect to MongoDB: {e}")
     mongo = None
+
 initial_config = {
     'layout': 'default',
     'currency': '$',
@@ -41,7 +52,6 @@ initial_config = {
     'sources': ['Salary', 'Investment', 'Savings']
 }
 
-
 @app.before_request
 def before_request():
     if 'config' not in session:
@@ -49,7 +59,7 @@ def before_request():
 
 
 @app.route("/signup", methods=["GET", "POST"])
-async def signup():
+def signup():
     if "user_id" in session:
         flash("You are already logged in!")
         return redirect(url_for("dashboard"))
@@ -81,7 +91,7 @@ async def signup():
 
 
 @app.route("/login", methods=["GET", "POST"])
-async def login():
+def login():
     if "user_id" in session:
         flash("You are already logged in!")
         return redirect(url_for("dashboard"))
@@ -108,42 +118,37 @@ def logout():
 
 
 @app.route("/")
-async def dashboard():
+def dashboard():
     if 'user_id' not in session:
         flash('You need to log in first', 'error')
         return redirect(url_for('login'))
 
     user_id = session["user_id"]
-
-    # Use cache to store data temporarily to improve performance
-    expenses = cache.get(f'expenses_{user_id}')
-    incomes = cache.get(f'incomes_{user_id}')
-    if not expenses or not incomes:
-        expenses = list(mongo.db.expenses.find({"user_id": user_id}))
-        incomes = list(mongo.db.incomes.find({"user_id": user_id}))
-        cache.set(f'expenses_{user_id}', expenses, timeout=300)
-        cache.set(f'incomes_{user_id}', incomes, timeout=300)
+    expenses = list(mongo.db.expenses.find({"user_id": user_id}))
+    incomes = list(mongo.db.incomes.find({"user_id": user_id}))
 
     total_expense = sum(expense.get("amount", 0) for expense in expenses)
     total_income = sum(income.get("amount", 0) for income in incomes)
     balance = total_income - total_expense
 
-    expense_chart = await asyncio.to_thread(generate_expense_chart, expenses)
-    income_chart = await asyncio.to_thread(generate_income_chart, incomes)
-    balance_trend = await asyncio.to_thread(generate_balance_trend, expenses, incomes)
+    with ThreadPoolExecutor() as executor:
+        expense_chart = executor.submit(generate_expense_chart, expenses)
+        income_chart = executor.submit(generate_income_chart, incomes)
+        balance_trend = executor.submit(generate_balance_trend, expenses, incomes)
 
     return render_template("dashboard.html",
                            total_expense=total_expense,
                            total_income=total_income,
                            balance=balance,
-                           expense_chart=expense_chart,
-                           income_chart=income_chart,
-                           balance_trend=balance_trend,
+                           expense_chart=expense_chart.result(),
+                           income_chart=income_chart.result(),
+                           balance_trend=balance_trend.result(),
                            config=mongo.db.config.find_one({"user_id": user_id}))
 
 
 @app.route("/add_expense", methods=["GET", "POST"])
-async def add_expense():
+@limiter.limit("5 per minute")
+def add_expense():
     if 'user_id' not in session:
         flash('You need to log in first', 'error')
         return redirect(url_for('login'))
@@ -177,10 +182,6 @@ async def add_expense():
             "date": date
         })
 
-        # Invalidate the cache
-        cache.delete(f'expenses_{user_id}')
-        cache.delete(f'incomes_{user_id}')
-
         flash("Expense added successfully")
         return redirect(url_for("dashboard"))
 
@@ -189,7 +190,8 @@ async def add_expense():
 
 
 @app.route("/add_income", methods=["GET", "POST"])
-async def add_income():
+@limiter.limit("5 per minute")
+def add_income():
     if 'user_id' not in session:
         flash('You need to log in first', 'error')
         return redirect(url_for('login'))
@@ -213,10 +215,6 @@ async def add_income():
             "date": date
         })
 
-        # Invalidate the cache
-        cache.delete(f'expenses_{user_id}')
-        cache.delete(f'incomes_{user_id}')
-
         flash("Income added successfully")
         return redirect(url_for("dashboard"))
 
@@ -225,7 +223,7 @@ async def add_income():
 
 
 @app.route("/reports")
-async def reports():
+def reports():
     if 'user_id' not in session:
         flash('You need to log in first', 'error')
         return redirect(url_for('login'))
@@ -234,21 +232,22 @@ async def reports():
     expenses = list(mongo.db.expenses.find({"user_id": user_id}))
     incomes = list(mongo.db.incomes.find({"user_id": user_id}))
 
-    monthly_report = await asyncio.to_thread(generate_monthly_report, expenses, incomes)
-    yearly_report = await asyncio.to_thread(generate_yearly_report, expenses, incomes)
-    weekly_report = await asyncio.to_thread(generate_weekly_report, expenses, incomes)
+    with ThreadPoolExecutor() as executor:
+        monthly_report = executor.submit(generate_monthly_report, expenses, incomes)
+        yearly_report = executor.submit(generate_yearly_report, expenses, incomes)
+        weekly_report = executor.submit(generate_weekly_report, expenses, incomes)
 
     user_id = session["user_id"]
     _config = mongo.db.config.find_one({"user_id": user_id})
     return render_template("reports.html",
-                           monthly_report=monthly_report,
-                           yearly_report=yearly_report,
-                           weekly_report=weekly_report,
+                           monthly_report=monthly_report.result(),
+                           yearly_report=yearly_report.result(),
+                           weekly_report=weekly_report.result(),
                            config=_config)
 
 
 @app.route('/config', methods=['GET', 'POST'])
-async def config():
+def config():
     if 'user_id' not in session:
         flash('You need to log in first', 'error')
         return redirect(url_for('login'))
@@ -275,8 +274,8 @@ async def config():
             upsert=True
         )
 
-        flash('Configuration saved successfully')
-    return redirect(url_for('config'))
+        flash('Configuration saved successfully', 'success')
+        return redirect(url_for('config'))
 
     # Fetch current configuration from MongoDB
     user_config = mongo.db.config.find_one({'user_id': user_id})
@@ -284,6 +283,14 @@ async def config():
         user_config = initial_config
 
     return render_template('config.html', config=user_config)
+
+@app.route("/health")
+def health():
+    try:
+        mongo.db.command('ping')
+        return "MongoDB connection: OK", 200
+    except ConnectionFailure as e:
+        return f"MongoDB connection: Error - {e}", 500
 
 def generate_expense_chart(expenses):
     df = pd.DataFrame(expenses)
@@ -365,7 +372,7 @@ def generate_yearly_report(expenses, incomes):
     df_expenses = df_expenses.dropna(subset=['date'])
 
     df_incomes["date"] = pd.to_datetime(df_incomes['date'], errors='coerce')
-    df_incomes = df_incomes.dropna(subset(['date'])
+    df_incomes = df_incomes.dropna(subset=['date'])
 
     df_expenses["year"] = df_expenses["date"].dt.year.astype(str)
     df_incomes["year"] = df_incomes["date"].dt.year.astype(str)
@@ -409,3 +416,12 @@ def parse_date(date_str):
         return datetime.strptime(date_str, '%Y-%m-%d')
     except ValueError:
         return None
+
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return render_template("ratelimit.html"), 429
+
+
+if __name__ == "__main__":
+    app.run(use_reloader=True, debug=False)
