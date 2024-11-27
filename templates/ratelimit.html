@@ -5,9 +5,25 @@
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
         <h2 class="font-bold text-xl mb-2">Rate Limit Exceeded</h2>
         <p>You have exceeded the allowed number of requests. Please wait a while before trying again.</p>
+        <!-- Countdown Timer -->
+        <p id="timer" class="font-semibold text-lg">You can try again in <span id="seconds">60</span> seconds.</p>
     </div>
     <div class="mt-4">
         <a href="{{ url_for('dashboard') }}" class="text-blue-500 hover:underline">Return to Dashboard</a>
     </div>
 </div>
+
+<script>
+    let seconds = 60; // Adjust this based on your server-side rate limit duration
+    const timerElement = document.getElementById("seconds");
+
+    const interval = setInterval(function() {
+        if (seconds > 0) {
+            seconds--;
+            timerElement.textContent = seconds;
+        } else {
+            clearInterval(interval);
+        }
+    }, 1000);
+</script>
 {% endblock %}
