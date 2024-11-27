@@ -1,42 +1,56 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl mt-8">
-        <div class="p-8">
-            <h2 class="text-2xl font-bold mb-4">Add Income</h2>
-            <form method="POST">
-                <div class="mb-4">
-                    <label for="amount" class="block text-gray-700 font-bold mb-2">Amount
-                        ({{ config.currency }})</label>
-                    <input type="number" step="0.01" name="amount" id="amount" required
-                           class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500">
-                </div>
-                <div class="mb-4">
-                    <label for="source" class="block text-gray-700 font-bold mb-2">Source</label>
-                    <select name="source" id="source" required
-                            class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500">
-                        {% for source in config.sources %}
-                            <option value="{{ source }}">{{ source }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label for="date" class="block text-gray-700 font-bold mb-2">Date</label>
-                    <input type="date" name="date" id="date" required
-                           class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500">
-                </div>
+<div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl mt-8">
+    <div class="p-6 sm:p-8">
+        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-gray-800">Add Income</h2>
+        <form method="POST" class="space-y-6">
+            <!-- Amount Field -->
+            <div>
+                <label for="amount" class="block text-sm sm:text-base text-gray-700 font-semibold mb-2">
+                    Amount ({{ config.currency }})
+                </label>
+                <input type="number" step="0.01" name="amount" id="amount" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+            </div>
+
+            <!-- Source Field -->
+            <div>
+                <label for="source" class="block text-sm sm:text-base text-gray-700 font-semibold mb-2">
+                    Source
+                </label>
+                <select name="source" id="source" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                    {% for source in config.sources %}
+                        <option value="{{ source }}">{{ source }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Date Field -->
+            <div>
+                <label for="date" class="block text-sm sm:text-base text-gray-700 font-semibold mb-2">
+                    Date
+                </label>
+                <input type="date" name="date" id="date" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+            </div>
+
+            <!-- Submit Button -->
+            <div>
                 <button type="submit"
-                        class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:shadow-outline">
+                    class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
                     Add Income
                 </button>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('date').value = new Date().toISOString().substr(0, 10);
-        });
-    </script>
-
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Set today's date as the default value
+        document.getElementById('date').value = new Date().toISOString().substr(0, 10);
+    });
+</script>
 {% endblock %}
