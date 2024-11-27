@@ -248,6 +248,46 @@ def config():
 
     config = mongo.db.config.find_one({"user_id": user_id}) or initial_config
     return render_template("config.html", config=config)
+    
+@app.route("/reports")
+@cache.cached(timeout=60, query_string=True)
+def reports():
+    if 'user_id' not in session:
+        flash('You need to log in first', 'error')
+        return redirect(url_for('login'))
+
+    user_id = session["user_id"]
+
+    # Fetch expenses and incomes for the user from the database
+    expenses = list(mongo.db.expenses.find({"user_id": user_id}))
+    incomes = list(mongo.db.incomes.find({"user_id": user_id}))
+
+    # Convert expenses and incomes to DataFrames for analysis
+    expense_df = pd.DataFrame(expenses)
+    income_df = pd.DataFrame(incomes)
+
+    # Generate charts for reports
+    expense_report = generate_chart(expense_df, "pie", values="amount", names="category", title="Expense Distribution")
+    income_report = generate_chart(income_df, "bar", x="source", y="amount", title="Income Sources")
+
+    # Calculate the total balance and trends
+    total_expense = sum(expense.get("amount", 0) for expense in expenses)
+    total_income = sum(income.get("amount", 0) for income in incomes)
+    balance = total_income - total_expense
+
+    balance_trend = generate_chart(
+        pd.concat([expense_df.assign(type="expense", amount=-expense_df["amount"]),
+                   income_df.assign(type="income")]),
+        "line", x="date", y="amount", title="Balance Trend"
+    )
+
+    return render_template("reports.html",
+                           total_expense=total_expense,
+                           total_income=total_income,
+                           balance=balance,
+                           expense_report=expense_report,
+                           income_report=income_report,
+                           balance_trend=balance_trend)
 
 @app.after_request
 def add_security_headers(response):
