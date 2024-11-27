@@ -1,15 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <!-- Financial Overview Section -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+        <!-- Total Income Card -->
         <div class="bg-white p-6 rounded-xl shadow-md">
             <h2 class="text-xl font-bold mb-4">Total Income</h2>
             <p class="text-3xl font-bold text-green-600">{{ config.currency }}{{ "%.2f"|format(total_income) }}</p>
         </div>
+
+        <!-- Total Expenses Card -->
         <div class="bg-white p-6 rounded-xl shadow-md">
             <h2 class="text-xl font-bold mb-4">Total Expenses</h2>
             <p class="text-3xl font-bold text-red-600">{{ config.currency }}{{ "%.2f"|format(total_expense) }}</p>
         </div>
+
+        <!-- Current Balance Card -->
         <div class="bg-white p-6 rounded-xl shadow-md">
             <h2 class="text-xl font-bold mb-4">Current Balance</h2>
             <p class="text-3xl font-bold {% if balance >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
@@ -17,17 +23,22 @@
         </div>
     </div>
 
+    <!-- Financial Distribution and Charts Section -->
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Expense Distribution Chart -->
         <div class="bg-white p-6 rounded-xl shadow-md">
             <h2 class="text-xl font-bold mb-4">Expense Distribution</h2>
             {{ expense_chart|safe }}
         </div>
+
+        <!-- Income Sources Chart -->
         <div class="bg-white p-6 rounded-xl shadow-md">
             <h2 class="text-xl font-bold mb-4">Income Sources</h2>
             {{ income_chart|safe }}
         </div>
     </div>
 
+    <!-- Balance Trend Chart -->
     <div class="mt-8 bg-white p-6 rounded-xl shadow-md">
         <h2 class="text-xl font-bold mb-4">Balance Trend</h2>
         {{ balance_trend|safe }}
