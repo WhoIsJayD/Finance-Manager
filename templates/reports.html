@@ -4,19 +4,37 @@
     <h1 class="text-3xl font-bold mb-8">Financial Reports</h1>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="bg-white p-6 rounded-xl shadow-md">
+        <div class="bg-white p-6 rounded-xl shadow-md" id="monthly-report">
             <h2 class="text-2xl font-bold mb-4">Monthly Report</h2>
-            {{ monthly_report|safe }}
+            <div id="monthly-report-content">
+                {% if monthly_report %}
+                    {{ monthly_report|safe }}
+                {% else %}
+                    <p>Loading monthly report...</p>
+                {% endif %}
+            </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-md">
+        <div class="bg-white p-6 rounded-xl shadow-md" id="yearly-report">
             <h2 class="text-2xl font-bold mb-4">Yearly Report</h2>
-            {{ yearly_report|safe }}
+            <div id="yearly-report-content">
+                {% if yearly_report %}
+                    {{ yearly_report|safe }}
+                {% else %}
+                    <p>Loading yearly report...</p>
+                {% endif %}
+            </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-md">
+        <div class="bg-white p-6 rounded-xl shadow-md" id="weekly-report">
             <h2 class="text-2xl font-bold mb-4">Weekly Report</h2>
-            {{ weekly_report|safe }}
+            <div id="weekly-report-content">
+                {% if weekly_report %}
+                    {{ weekly_report|safe }}
+                {% else %}
+                    <p>Loading weekly report...</p>
+                {% endif %}
+            </div>
         </div>
     </div>
 {% endblock %}
