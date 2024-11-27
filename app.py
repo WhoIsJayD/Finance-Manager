@@ -249,6 +249,10 @@ def config():
     config = mongo.db.config.find_one({"user_id": user_id}) or initial_config
     return render_template("config.html", config=config)
 
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Frame-Options'] = 'DENY'
+    return response
 
 @app.route("/health")
 def health():
