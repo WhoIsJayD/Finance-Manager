@@ -390,32 +390,40 @@ def cached(ttl_seconds=300):
         
         @wraps(func)
         def wrapper(*args, **kwargs):
-            # Create a cache key from the function arguments
-            key_parts = [func.__name__]
-            key_parts.extend([str(arg) for arg in args])
-            key_parts.extend([f"{k}:{v}" for k, v in sorted(kwargs.items())])
-            cache_key = hashlib.md5(":".join(key_parts).encode()).hexdigest()
-            
-            # Check cache
+            cache_key = wrapper._generate_cache_key(*args, **kwargs)
             now = time.time()
+
             if cache_key in cache:
                 result, timestamp = cache[cache_key]
                 if now - timestamp < ttl_seconds:
                     return result
-            
-            # Generate fresh result
+
             result = func(*args, **kwargs)
             cache[cache_key] = (result, now)
-            
-            # Clean old cache entries if cache is getting large
+
+            # Optional: clean up stale entries
             if len(cache) > 1000:
                 old_keys = [k for k, (_, ts) in cache.items() if now - ts > ttl_seconds]
                 for k in old_keys:
                     del cache[k]
-            
+
             return result
-        
-        # Store the cache dictionary on the wrapper for access by cache invalidation
+
+        # Helper to generate the cache key
+        def _generate_cache_key(*args, **kwargs):
+            key_parts = [func.__name__]
+            key_parts.extend([str(arg) for arg in args])
+            key_parts.extend([f"{k}:{v}" for k, v in sorted(kwargs.items())])
+            return hashlib.md5(":".join(key_parts).encode()).hexdigest()
+
+        # Invalidate cache manually for specific args/kwargs
+        def invalidate(*args, **kwargs):
+            key = _generate_cache_key(*args, **kwargs)
+            if key in cache:
+                del cache[key]
+
+        wrapper._generate_cache_key = _generate_cache_key
+        wrapper.invalidate = invalidate
         wrapper.cache = cache
         return wrapper
     return decorator
@@ -1553,7 +1561,7 @@ def update_settings():
         )
         
         # Invalidate cache for this user
-        invalidate_settings_cache(user_id)
+        get_user_settings.invalidate(user_id)
         
         flash('Settings updated successfully', 'success')
         return redirect(url_for('user_settings', message='Settings updated successfully', type='success'))
