@@ -421,7 +421,7 @@ def cached(ttl_seconds=300):
     return decorator
 
 # Cached version of get_user_settings
-@cached(ttl_seconds=300)
+@cached(ttl_seconds=30)
 def get_user_settings(user_id=None):
     """Get user settings with caching to reduce database load"""
     if not user_id and 'user_id' in session:
