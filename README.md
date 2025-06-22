@@ -1,428 +1,172 @@
-# Finance Manager
+# 💰 Finance Manager
 
-A comprehensive personal finance management system built with Flask and MongoDB.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Flask](https://img.shields.io/badge/Flask-2.3.3-green)](https://flask.palletsprojects.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-6.0-brightgreen)](https://www.mongodb.com/)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg)](https://www.docker.com/)
+![visitor badge](https://visitor-badge.laobi.icu/badge?page_id=https://github.com/WhoIsJayD/Finance-Manage)
 
-## Features
+A comprehensive personal finance management web application built with Flask and MongoDB. Track your income and expenses, analyze your spending habits with detailed reports, set budgets, and take full control of your financial life.
 
-- **Expense & Income Tracking**: Record and manage all your transactions with ease.
-- **Budget Management**: Set budgets for different categories and track spending.
-- **Advanced Reporting**: Visualize your finances with charts and detailed reports.
-- **Customization**: Configure currency, date format, categories, and more.
-- **Email Notifications**: Receive timely updates about your financial situation.
-- **Dark Mode Support**: Work with your finances day or night with theme support.
-- **Admin Log Viewer**: Secure dashboard for viewing and managing application logs.
-- **User Management**: Admin panel for managing users and their privileges.
+[**Watch the Demo**](#-live-demo--screenshots) · [**Report a Bug**](https://github.com/WhoIsJayD/Finance-Manager/issues) · [**Request a Feature**](https://github.com/WhoIsJayD/Finance-Manager/issues)
 
-## Requirements
 
-- Python 3.9+
-- MongoDB
-- Resend API Key (for email functionality)
+### 🌟 Key Features
 
-## Installation
+-   📊 **Interactive Dashboard**: Get an instant overview of your finances, including income, expenses, current balance, and recent transactions.
+-   💸 **Transaction Management**: Easily add, edit, and delete income and expense records with details like tags and payment methods.
+-   🎯 **Budgeting System**: Set monthly budgets for different expense categories and visually track your progress against them.
+-   📈 **Advanced Reporting**: Visualize your financial data with dynamic charts for monthly trends, category breakdowns, payment methods, and cash flow projections.
+-   🎨 **Customizable Interface**: Personalize your experience with theme support (light/dark mode), multiple currencies, and custom date formats.
+-   📧 **Email Notifications**: Receive security alerts, budget warnings, and financial summaries directly to your inbox using Resend.
+-   🔐 **Secure Admin System**: A protected area for user management (grant/revoke admin rights) and viewing system logs.
+-   🐳 **Dockerized**: Get up and running in minutes with the provided Docker Compose setup for a smooth deployment.
 
-### Local Development Setup
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/WhoIsJayD/Finance-Manager
-   cd Finance-Manager
-   ```
+### 🎥 Live Demo & Screenshots
 
-2. Create and activate a virtual environment:
-   ```
-   python -m venv venv
-   source venv/bin/activate  # On Unix/Linux/Mac
-   venv\Scripts\activate     # On Windows
-   ```
+Click the thumbnail below to watch a video overview of the dashboard and its features.
+<div align="center">
+  <a href="https://res.cloudinary.com/dx9ctc074/video/upload/v1750612468/xjnwfyagyptuyalparfk.mp4">
+    <img src="https://res.cloudinary.com/dx9ctc074/image/upload/v1750612741/nope92vbrk6pnq7rfylp.gif" alt="Application Demo" width="100%">
+  </a>
+</div>
 
-3. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
+#### 📱 Screenshots
 
-4. Create a `.env` file by copying the example:
-   ```
-   cp .env.example .env       # On Unix/Linux/Mac
-   copy .env.example .env     # On Windows
-   ```
-   Then edit the file to configure your environment variables.
+| Transaction Page | Budget Page | Report Page | Admin Dashboard |
+|:----------------:|:-----------:|:-----------:|:---------------:|
+| ![Transaction Page](https://i.imgur.com/PNjjy0O.png) | ![Budget Page](https://i.imgur.com/uw27TSC.png) | ![Report Page](https://i.imgur.com/UGsW3AV.png) | ![Admin Dashboard](https://i.imgur.com/H33MA9W.png) |
 
-5. Set up MongoDB:
-   - Ensure MongoDB is running on localhost:27017 or update the connection string in your `.env` file
 
-6. Run the application:
-   ```
-   flask run
-   ```
+### 🛠️ Tech Stack
+
+Built with a modern and robust technology stack:
+
+-   **Backend**: Python, Flask
+-   **Database**: MongoDB (with PyMongo)
+-   **Frontend**: HTML, CSS, JavaScript, Bootstrap 5
+-   **Charting**: Chart.js
+-   **WSGI Servers**: Gunicorn (for Linux/macOS), Waitress (for Windows)
+-   **Deployment**: Docker
+
+
+### 🚀 Getting Started
+
+The fastest way to get the Finance Manager running is with Docker.
+
+#### Prerequisites
+
+-   [Docker](https://www.docker.com/products/docker-desktop/) and [Docker Compose](https://docs.docker.com/compose/install/)
+-   Git
+
+#### Quick Start with Docker
+
+1.  **Clone the repository:**
+    ```sh
+    git clone [https://github.com/WhoIsJayD/Finance-Manager.git](https://github.com/WhoIsJayD/Finance-Manager.git)
+    cd Finance-Manager
+    ```
+
+2.  **Create your environment file:**
+    Copy the example file. On Linux/macOS, use `cp .env.example .env`. On Windows, use `copy .env.example .env`.
+
+3.  **Configure your `.env` file:**
+    Open the `.env` file and set the following variables. A strong `SECRET_KEY` is crucial.
+    ```env
+    FLASK_ENV=production
+    SECRET_KEY=generate_a_very_secure_random_string_here
+    RESEND_API_KEY=your_resend_api_key_for_emails
+    ADMIN_SETUP_CODE=a_secure_random_code_for_first_admin_setup
+    ADMIN_PASSWORD=a_strong_password_for_sensitive_admin_actions
+    ```
+
+4.  **Build and run the containers:**
+    ```sh
+    docker-compose up -d --build
+    ```
+
+5.  **Access the application:**
+    Open your browser and navigate to `http://localhost:5000`.
+
+6.  **Initialize the first Admin User:**
+    -   Navigate to `http://localhost:5000/initialize-admin`.
+    -   Enter the `ADMIN_SETUP_CODE` from your `.env` file.
+    -   Fill in the form to create your admin account.
+
+
+### ⚙️ Manual Installation (Without Docker)
+
+If you prefer a manual setup:
+
+1.  **Clone the repository and create a virtual environment:**
+    ```sh
+    git clone [https://github.com/WhoIsJayD/Finance-Manager.git](https://github.com/WhoIsJayD/Finance-Manager.git)
+    cd Finance-Manager
+    python3 -m venv venv
+    source venv/bin/activate  # On Linux/macOS
+    # venv\Scripts\activate   # On Windows
+    ```
+
+2.  **Install dependencies:**
+    ```sh
+    pip install -r requirements.txt
+    ```
    
-## Production Deployment
 
-### Using Docker
+3.  **Set up MongoDB:**
+    Ensure you have a running MongoDB instance and update the `MONGO_URI` in your `.env` file accordingly.
 
-The easiest way to deploy the Finance Manager in production is using Docker and Docker Compose.
+4.  **Configure and run the application:**
+    -   Create and fill out the `.env` file as described in the Docker setup.
+    -   **On Linux/macOS (with Gunicorn):**
+        ```sh
+        gunicorn --bind 0.0.0.0:5000 "app:app"
+        ```
+       
+    -   **On Windows (with Waitress):**
+        ```sh
+        python run_server.py
+        ```
+       
 
-1. Clone the repository and navigate to the project folder
-2. Create a `.env` file with production settings:
-   ```
-   cp .env.example .env       # On Unix/Linux/Mac
-   copy .env.example .env     # On Windows
-   ```
-   
-   Update the following variables for production:
-   ```
-   FLASK_ENV=production
-   SECRET_KEY=<generate-a-secure-random-key>
-   RESEND_API_KEY=<your-resend-api-key>
-   ```
-   
-3. Build and run the containers:
-   ```
-   docker-compose up -d
-   ```
 
-This will start the application with Gunicorn and MongoDB, with proper isolation and volume persistence.
+### 🔒 Security Considerations
 
-### Manual Deployment - Linux/macOS
+The application is built with security in mind:
+-   Password hashing with **bcrypt**.
+-   Rate limiting on login/registration routes to prevent brute-force attacks.
+-   Secure, `HttpOnly` session cookies.
+-   Admin actions like toggling user privileges require password confirmation.
+-   Input validation and parameterized database queries to prevent injection attacks.
 
-If you prefer to deploy without Docker on Linux or macOS:
+For production, always run behind a reverse proxy (like Nginx or Caddy) and enable HTTPS.
 
-1. Set up a production MongoDB instance
-2. Configure environment variables for production
-3. Install dependencies: `pip install -r requirements.txt`
-4. Run with Gunicorn:
-   ```
-   gunicorn --bind 0.0.0.0:5000 app:app --workers=4 --threads=2 --timeout=60
-   ```
 
-5. Set up a reverse proxy like Nginx to serve the application
 
-### Manual Deployment - Windows
+### 🤝 Contributing
 
-For Windows deployment without Docker:
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-1. Set up a production MongoDB instance
-2. Configure environment variables for production
-3. Install dependencies: `pip install -r requirements.txt`
-4. Run with Waitress using the provided script:
-   ```
-   python run_server.py
-   ```
+1.  **Fork the Project**.
+2.  **Create your Feature Branch** (`git checkout -b feature/AmazingFeature`).
+3.  **Commit your Changes** (`git commit -m 'Add some AmazingFeature'`).
+4.  **Push to the Branch** (`git push origin feature/AmazingFeature`).
+5.  **Open a Pull Request**.
 
-5. For a production environment, consider setting up IIS as a reverse proxy
+Please ensure your code follows the existing style and that you add comments for complex logic.
 
-## Security Considerations
 
-The application implements several security features:
 
-- Password hashing with bcrypt
-- Rate limiting for login and registration endpoints
-- Secure session cookies
-- CSRF protection for forms
-- Email notifications for security-sensitive actions
-- Input validation and sanitization
+### 📄 License
 
-For production deployments, we recommend:
+Distributed under the MIT License. See `LICENSE` file for more information.
 
-- Always use HTTPS with a valid SSL certificate
-- Set up proper firewall rules
-- Regularly backup your MongoDB database
-- Keep all dependencies updated
-- Use a strong SECRET_KEY value
 
-## Email System
+### 🙏 Acknowledgements
 
-The Finance Manager includes a robust email notification system for keeping users informed about their finances.
-
-### Setting Up Email
-
-1. Sign up for an account at [Resend](https://resend.com) to get an API key.
-2. Set the API key as an environment variable:
-   ```
-   RESEND_API_KEY=your_resend_api_key
-   ```
-3. Customize the sender email in your `.env` file if needed (default is "Finance Manager <no-reply@finance-manager.com>").
-
-### Email Features
-
-- **Weekly Summaries**: Users receive a weekly overview of income, expenses, and top spending categories.
-- **Monthly Reports**: Detailed monthly financial reports.
-- **Budget Alerts**: Notifications when users approach or exceed budget limits.
-- **Security Alerts**: Email notifications for password changes and account updates.
-- **Transaction Confirmations**: Confirmations for large or important transactions.
-
-### User Preferences
-
-Users can customize which email notifications they wish to receive through the Settings page:
-
-1. Navigate to the Settings page
-2. Go to the "Email Notifications" tab
-3. Check/uncheck desired notification types
-4. Save preferences
-
-### Testing Email Functionality
-
-To test if email sending works correctly:
-
-1. Log in to your account
-2. Go to the Settings page
-3. Navigate to the "Email Notifications" tab
-4. Click "Send Test Email"
-
-## Performance Optimization
-
-The system is optimized for high performance and can handle many concurrent users:
-
-### Database Optimization
-
-- Proper MongoDB indexing for fast queries
-- Query projection to retrieve only necessary data
-- Client-side calculations to reduce database load
-- Caching of frequently accessed data
-
-### Email System Optimization
-
-- Background processing of emails via worker threads
-- Email queue for handling high volume
-- Graceful degradation if email service is unavailable
-
-## Monitoring and Logging
-
-The application includes comprehensive logging:
-
-- Application logs stored in the `logs` directory
-- Separate log streams for application and email functionality
-- Log rotation to prevent disk space issues
-- Error tracking and reporting
-
-You can monitor the application using:
-
-- The `/security-check` endpoint (requires login)
-- The `/admin/logs` endpoint for viewing detailed logs (requires admin login)
-- Log analysis
-- MongoDB status checks
-
-### Admin Log Viewer
-
-The application includes a secure web interface for viewing and managing logs:
-
-1. Access the log viewer at `/admin/logs` (admin privileges required)
-2. View application logs, email logs, or server logs
-3. Filter logs using the search function
-4. Navigate through log pages with pagination
-5. Download logs for offline analysis
-6. Clear logs with admin password confirmation (logs are backed up before clearing)
-
-For security, the log viewer requires:
-- A valid user account with admin privileges
-- The ADMIN_PASSWORD environment variable to be set for clearing logs
-
-## Admin System
-
-Finance Manager includes a comprehensive admin system for managing the application and users.
-
-### Initial Admin Setup
-
-When first deploying the application, you need to initialize an admin user:
-
-1. Set the `ADMIN_SETUP_CODE` in your `.env` file to a secure random string
-2. Navigate to `/initialize-admin` in your browser
-3. Enter the setup code from your `.env` file
-4. Provide an email address and password for the admin user
-5. Submit the form to create the first admin
-
-### Admin Features
-
-Once you have admin access, you can:
-
-1. **Manage Users**: View all users and grant/revoke admin privileges at `/admin/users`
-2. **View System Logs**: Access application logs, email logs, and server logs at `/admin/logs`
-3. **Clear Logs**: Clear and backup log files as needed (requires admin password confirmation)
-
-### Granting Admin Privileges
-
-To grant admin privileges to additional users:
-
-1. Log in with an existing admin account
-2. Navigate to `/admin/users`
-3. Click "Make Admin" next to the desired user
-4. Enter the admin password from your `.env` file to confirm
-5. The user will now have admin access
-
-### Admin Security
-
-The admin system is secured through multiple layers:
-
-1. Admin privileges are checked on all admin routes using `@admin_required` decorator
-2. Sensitive operations (like changing admin status) require admin password confirmation
-3. All admin actions are logged for accountability
-4. Admin-only routes redirect non-admin users to the dashboard with an error message
-
-## Troubleshooting
-
-### Windows-Specific Issues
-
-If you encounter issues installing dependencies on Windows:
-
-1. Make sure you have a C++ compiler installed if installing bcrypt or cryptography packages
-2. Consider using MongoDB Atlas instead of a local MongoDB instance
-3. If uwsgi installation fails, it's not needed on Windows - the application will use Waitress instead
-
-### Email Issues
-
-If emails are not being sent:
-
-1. Check if Resend API key is correctly set
-2. Verify user has an email address in their profile
-3. Ensure user has enabled the specific notification type
-4. Check the email logs
-
-### Database Performance
-
-If the application feels slow:
-
-1. Ensure MongoDB indexes are created
-2. Check for inefficient queries in the logs
-3. Consider increasing cache TTLs for stable data
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Tech Stack
-
-- **Backend**: Python, Flask
-- **Database**: MongoDB with PyMongo
-- **Frontend**: HTML, CSS, JavaScript, Bootstrap 5
-- **Charts**: Chart.js
-
-## Project Structure
-
-```
-finance_manager/
-├── app.py                  # Main application file
-├── requirements.txt        # Python dependencies
-├── static/                 # Static files
-│   ├── css/                # CSS styles
-│   │   └── style.css       # Custom styles
-│   └── js/                 # JavaScript files
-│       └── main.js         # Common JS functionality
-└── templates/              # HTML templates
-    ├── base.html           # Base template
-    ├── index.html          # Landing page
-    ├── login.html          # Login page
-    ├── register.html       # Registration page
-    ├── dashboard.html      # User dashboard
-    ├── transactions.html   # Transactions list
-    ├── add_transaction.html # Add transaction form
-    ├── edit_transaction.html # Edit transaction form
-    ├── budgets.html        # Budget management
-    ├── settings.html       # User settings
-    └── reports.html        # Financial reports
-```
-
-## API Endpoints
-
-- `/api/transactions` - Get filtered transactions
-- `/api/reports/category` - Get spending by category
-- `/api/reports/monthly` - Get monthly income and expense data
-- `/api/budget/progress` - Get budget progress data
-
-## Database Schema
-
-**Users Collection**
-```
-{
-  _id: ObjectId,
-  email: String,
-  password: String (hashed),
-  created_at: DateTime
-}
-```
-
-**Transactions Collection**
-```
-{
-  _id: ObjectId,
-  user_id: String,
-  amount: Float,
-  description: String,
-  category: String,
-  type: String (income/expense),
-  date: DateTime,
-  tags: [String], (optional)
-  payment_method: String, (optional)
-  notes: String, (optional)
-  created_at: DateTime,
-  updated_at: DateTime (optional)
-}
-```
-
-**Budgets Collection**
-```
-{
-  _id: ObjectId,
-  user_id: String,
-  category: String,
-  amount: Float,
-  created_at: DateTime,
-  updated_at: DateTime (optional)
-}
-```
-
-**Settings Collection**
-```
-{
-  _id: ObjectId,
-  user_id: String,
-  currency: String,
-  date_format: String,
-  theme: String (light/dark),
-  dashboard_widgets: [String],
-  default_categories: {
-    income: [String],
-    expense: [String]
-  },
-  created_at: DateTime,
-  updated_at: DateTime (optional)
-}
-```
-
-## Advanced Features
-
-### Budget Management
-- Set monthly budgets by category
-- Visual indicators for budget progress
-- Alerts for exceeding budget thresholds
-- Monthly budget summaries
-
-### Custom Categories
-- Define and customize your own income and expense categories
-- Default categories provided for quick setup
-- Ability to add, rename, and remove categories
-
-### Transaction Tagging
-- Add custom tags to transactions
-- Filter and search by tags
-- Group reports by tags
-
-### User Preferences
-- Choose currency format
-- Select date format
-- Switch between light and dark themes
-- Customize dashboard layout
-
-## License
-
-MIT License
-
-## Acknowledgements
-
-- Bootstrap 5 for the UI components
-- Chart.js for the data visualizations
-- MongoDB for the database
-- Flask for the web framework 
+-   [Bootstrap](https://getbootstrap.com/)
+-   [Chart.js](https://www.chartjs.org/)
+-   [Flask](https://flask.palletsprojects.com/)
+-   [MongoDB](https://www.mongodb.com/)
